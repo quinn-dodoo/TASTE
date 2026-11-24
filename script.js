@@ -1,11 +1,16 @@
-// Page behavior, separate from the p5 artwork in sketch.js.
+// SPDX-License-Identifier: GPL-3.0-only
 function fitCanvasToWindow() {
   const canvas = document.getElementById('owned-collage');
-  if (!canvas) { return; }
+  if (!canvas) {
+    return;
+  }
   const ratio = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
   canvas.style.width = `${1920 * ratio}px`;
   canvas.style.height = `${1080 * ratio}px`;
-  // Anchor Info inside the artwork, including any letterbox margins.
+  positionInfoButton(canvas);
+}
+
+function positionInfoButton(canvas) {
   const button = document.getElementById('info-button');
   if (button) {
     const bounds = canvas.getBoundingClientRect();
@@ -37,18 +42,42 @@ infoButton.addEventListener('click', openInfoWindow);
 infoClose.addEventListener('click', closeInfoWindow);
 // Stop UI input before it reaches the document-level p5 handlers.
 for (const element of [infoButton, infoWindow]) {
-  for (const type of ['pointerdown', 'pointerup', 'pointermove', 'mousedown', 'mouseup', 'mousemove', 'click', 'dblclick', 'touchstart', 'touchmove', 'touchend', 'wheel', 'keydown', 'keyup']) {
-    element.addEventListener(type, event => {
-      if (type === 'keydown' && event.key === 'Escape') { event.preventDefault(); closeInfoWindow(); }
+  for (const type of [
+    'pointerdown',
+    'pointerup',
+    'pointermove',
+    'mousedown',
+    'mouseup',
+    'mousemove',
+    'click',
+    'dblclick',
+    'touchstart',
+    'touchmove',
+    'touchend',
+    'wheel',
+    'keydown',
+    'keyup',
+  ]) {
+    element.addEventListener(type, (event) => {
+      if (type === 'keydown' && event.key === 'Escape') {
+        event.preventDefault();
+        closeInfoWindow();
+      }
       event.stopPropagation();
     });
   }
 }
-document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && !infoWindow.hidden) {
-    event.preventDefault(); event.stopPropagation(); closeInfoWindow();
-  }
-}, true);
+document.addEventListener(
+  'keydown',
+  (event) => {
+    if (event.key === 'Escape' && !infoWindow.hidden) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeInfoWindow();
+    }
+  },
+  true,
+);
 
 // Title-bar dragging, with viewport bounds recalculated after resizing.
 const infoTitlebar = infoWindow.querySelector('.window-titlebar');
@@ -65,18 +94,20 @@ function fitInfoWindow() {
   const rect = infoWindow.getBoundingClientRect();
   clampInfoPosition(rect.left, rect.top);
 }
-infoTitlebar.addEventListener('pointerdown', event => {
+infoTitlebar.addEventListener('pointerdown', (event) => {
   if (event.target.closest('button') || event.button !== 0) return;
   const rect = infoWindow.getBoundingClientRect();
   infoDrag = { id: event.pointerId, dx: event.clientX - rect.left, dy: event.clientY - rect.top };
   infoTitlebar.setPointerCapture(event.pointerId);
   infoTitlebar.classList.add('dragging');
-  event.preventDefault(); event.stopPropagation();
+  event.preventDefault();
+  event.stopPropagation();
 });
-infoTitlebar.addEventListener('pointermove', event => {
+infoTitlebar.addEventListener('pointermove', (event) => {
   if (!infoDrag || event.pointerId !== infoDrag.id) return;
   clampInfoPosition(event.clientX - infoDrag.dx, event.clientY - infoDrag.dy);
-  event.preventDefault(); event.stopPropagation();
+  event.preventDefault();
+  event.stopPropagation();
 });
 function stopInfoDrag() {
   if (infoDrag && infoTitlebar.hasPointerCapture(infoDrag.id)) infoTitlebar.releasePointerCapture(infoDrag.id);
@@ -88,3 +119,15 @@ for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
 }
 window.addEventListener('resize', fitInfoWindow);
 new ResizeObserver(fitInfoWindow).observe(infoWindow);
+
+async function toggleFullscreen() {
+  try {
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else await document.documentElement.requestFullscreen();
+  } catch (error) {
+    console.warn('Fullscreen is unavailable in this browser.', error);
+  }
+}
+
+document.getElementById('artwork').addEventListener('dblclick', toggleFullscreen);
+document.addEventListener('fullscreenchange', fitCanvasToWindow);

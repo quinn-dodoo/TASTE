@@ -1,48 +1,91 @@
 # TASTE.EXE
 
-Generative artwork for COMM2754 — Digital Media Specialization 1, A1.
+A generative artwork by Nguyễn Hoàng Quỳnh Anh for COMM2754 — Digital Media Specialization 1, A1. TASTE explores consumer identity and SDG 12 through a photographic mouth, changing objects, interrupted typography and seven word-glitch backgrounds.
 
-TASTE explores consumer identity and SDG 12 through a photographic mouth, changing consumer objects, seven evolving word backgrounds, kinetic typography and numbered connections.
+[Open the website](https://quinn-dodoo.github.io/TASTE/).
 
-## Website
+## Run the artwork
 
-https://quinn-dodoo.github.io/TASTE/
+1. Keep `index.html`, the JavaScript files, `style.css`, `p5.min.js` and `images/` together in this directory.
+2. Open a terminal in this directory and start a web server:
 
-## Run locally
+   ```sh
+   python3 -m http.server 8000
+   ```
 
-Run `python3 -m http.server 8000` in this folder, then open http://localhost:8000/.
+   On Windows, `py -m http.server 8000` also works if Python is installed.
 
-## Project files
+3. Open [http://localhost:8000/index.html](http://localhost:8000/index.html) in a desktop browser.
+4. Press Ctrl+C in the terminal when finished.
 
-- `index.html`: artwork page and project information window.
-- `backgrounds.js`: independent seeded background systems.
-- `sketch.js`: generative artwork, typography, image motion and pointers.
-- `script.js`: responsive layout and draggable information window.
-- `style.css`: page and information-window styling.
-- `p5.min.js`: bundled p5.js library.
-- `images/`: original image assets; filenames are case-sensitive.
-- `Sound/`: raw sound effects and Audacity development sessions. These are retained as project files; the website does not currently play them.
+VS Code users can also open `index.html` with the Live Server extension if it is already installed.
 
-The canvas uses 1920×1080 internal dimensions and scales to fit the browser. GitHub Pages serves the website from the root of `main`.
+Any static web server works. No build, npm installation or internet connection is needed to run the artwork. Use a web server rather than opening the HTML through `file://`, so the image files can load correctly. The original PNG files are large and load progressively.
 
-## Generative backgrounds
+## Viewing and controls
 
-Every reload chooses a fresh seed and one of seven systems. In the same browser tab, consecutive reloads avoid the previous system when session storage is available. Layout, density and motion vary within each system; each continues to evolve over time.
+The canvas is **1920 × 1080 pixels**, including on Retina displays. It scales proportionally to fit the browser without stretching or cropping. Screens with a different aspect ratio have margins around the artwork.
 
-- **Redaction:** abrupt block masks reveal and censor consumption words, alternating dense and sparse states.
-- **Mosaic:** character tiles jump between broken grids, with row offsets, missing blocks and sudden letter substitutions.
-- **Shards:** flat paragraph fragments snap into new broken arrangements; replaces the former vortex.
-- **Receipts:** receipt columns advance in hard steps and tear sideways.
-- **Scatter:** crisp words jump to new positions with no fading or trails; replaces the former swarm.
-- **Automata:** neighbouring cells generate new text patterns using rules 30, 90, 110 or 150, with occasional fresh inputs.
-- **Rain:** staggered streams jump in discrete steps with sideways corruption.
+- Refresh to generate a new composition and choose a different background type.
+- Double-click the artwork to enter or leave fullscreen in browsers that support the Fullscreen API. Escape also exits fullscreen. If an embedded preview does not support it, use your browser's fullscreen command.
+- Click **i** for project information. Drag its title bar to move it; close it with **×** or Escape.
 
-The backgrounds hold an exact cached frame for roughly 37–169 ms, with occasional longer holds, then cut directly to the next state. Five horizontal strips are displaced on each cut. Each frame starts with an opaque blue reset: no interpolation, motion blur or accumulated trails. The foreground animation keeps its own timing. Their random state does not alter the tuned clothing, typography or pointer timing. No new libraries, images or network requests are needed.
+## Files
 
-For a repeatable background preview, add `?background=mosaic&seed=8101` to the website URL (use any name above in lowercase). Remove the query to return to random selection. This reproduces the background, not the independently generated foreground.
+| File                                             | Purpose                                                            |
+| ------------------------------------------------ | ------------------------------------------------------------------ |
+| `index.html`                                     | Entry page, script order and project information                   |
+| `settings.js`                                    | Canvas dimensions, object timing and image paths                   |
+| `sketch.js`                                      | p5 setup and animation loop                                        |
+| `canvas.js`                                      | Small shared drawing helpers                                       |
+| `assets.js`                                      | Image loading, cropping and connector endpoints                    |
+| `objects.js`                                     | Object placement, jumps and yellow halftone rendering              |
+| `pointers.js`                                    | Mouth image and numbered tongue connections                        |
+| `typography.js`                                  | Headline, accumulating poster and error-stack text                 |
+| `backgrounds.js`                                 | Seven seeded word-glitch systems                                   |
+| `script.js`, `style.css`                         | Responsive page, fullscreen and information window                 |
+| `p5.min.js`                                      | Unmodified p5.js 2.4.0 library                                     |
+| `images/`                                        | Original artwork images; names are case-sensitive                  |
+| `Sound/`                                         | Sound experiments and Audacity sessions; not played by the website |
+| `tests/`                                         | Optional checks and background preview gallery                     |
+| `LICENSE`                                        | Full GNU GPL version 3 license for original code                   |
+| `THIRD_PARTY_NOTICES.md`, `licenses/`, `vendor/` | Credits, third-party licenses and upstream source                  |
+
+Most functions have fewer than 15 nonblank body lines. A few image-loading and fallback-drawing routines stay together for readability. Comments explain timing, image processing or third-party attribution where needed. The bundled p5 library is kept intact.
+
+## Generative systems
+
+Each reload selects a new seed. Consecutive reloads in the same tab avoid the previous background when session storage is available. Each background has its own random state and held-frame rhythm, separate from the foreground animation.
+
+- **Redaction:** blocks abruptly reveal or conceal consumption words.
+- **Mosaic:** character tiles jump between broken grids.
+- **Shards:** paragraph fragments snap into new arrangements.
+- **Receipts:** receipt columns advance in steps and tear sideways.
+- **Scatter:** words jump between positions without trails.
+- **Automata:** neighbouring cells build new patterns with rules 30, 90, 110 or 150.
+- **Rain:** streams of fragmented phrases move in discrete jumps.
+
+Frames are held briefly, then replaced with a solid blue reset and displaced strips. The smaller background buffer is scaled onto the 1920 × 1080 artwork.
+
+For a repeatable background, append `?background=mosaic&seed=8101` to the URL. Use any lowercase name above. Remove the query to restore random selection. This reproduces only the background; foreground images and typography remain independent. Older `vortex` and `swarm` links resolve to `shards` and `scatter`.
+
+To add an image, add its exact filename to `OBJECT_PATHS` in `settings.js`. Object timing lives there too; large-text colours and timing are at the top of `typography.js`.
 
 ## Checks
 
-Run `node tests/backgrounds.test.cjs` for seed variation, repeatability, continuing evolution, finite drawing coordinates, reload selection, exact frame holds and opaque clears. Open `tests/backgrounds.html` through the local server to inspect all seven systems together. Its timing readout measures all seven running simultaneously, not the normal single-background page.
+These optional checks require Node.js, with no additional packages:
 
-Legacy `background=vortex` and `background=swarm` preview links resolve to `shards` and `scatter`.
+```sh
+node tests/backgrounds.test.cjs
+node tests/artwork.test.cjs
+```
+
+They cover seed variation, held frames, opaque clears, selection on reload, image loading, all three typography scenes, object bounds, pointer IDs and finite drawing coordinates. Open [the background gallery](tests/backgrounds.html) through the local server to view all seven systems together. Its timing readout measures all seven at once.
+
+## License and credits
+
+Copyright © 2026 Nguyễn Hoàng Quỳnh Anh.
+
+The original project code is released under **GNU GPL version 3 only**, without warranty. The complete license is included in [LICENSE](LICENSE). Third-party components keep their own licenses; photographs and audio are not relicensed by this code license.
+
+The artwork uses [p5.js](https://p5js.org/) under LGPL 2.1 and the [Mulberry32 algorithm by Tommy Ettinger](https://gist.github.com/tommyettinger/46a874533244883189143505d203312c) under CC0. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for source citations, dependency notices and included license texts.
