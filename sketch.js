@@ -1,173 +1,3 @@
-// Subtle moving blue-white clouds, underneath the code rain.
-const BLUE_NOISE_ENABLED = true;
-const BLUE_NOISE_OPACITY = 0.12;
-const BLUE_NOISE_SPEED = 0.18;
-let blueNoiseCloud, blueNoiseNextFrame = 0;
-function drawBlueNoise() {
-  if (!BLUE_NOISE_ENABLED) return;
-  if (!blueNoiseCloud) {
-    blueNoiseCloud = document.createElement('canvas');
-    blueNoiseCloud.width = 240; blueNoiseCloud.height = 135;
-  }
-  const time = artTime * 0.001 * BLUE_NOISE_SPEED;
-  if (artTime >= blueNoiseNextFrame) {
-    const cloudCtx = blueNoiseCloud.getContext('2d');
-    const field = cloudCtx.createImageData(240, 135);
-    for (let y = 0; y < 135; y++) {
-      for (let x = 0; x < 240; x++) {
-        const value = noise(x * 0.018 + time * 0.3, y * 0.018, time);
-        const mist = Math.max(0, Math.min(1, (value - 0.2) * 1.8));
-        const i = (y * 240 + x) * 4;
-        field.data[i] = mist * 255;
-        field.data[i + 1] = 25 + mist * 230;
-        field.data[i + 2] = 255;
-        field.data[i + 3] = 255;
-      }
-    }
-    cloudCtx.putImageData(field, 0, 0);
-    blueNoiseNextFrame = artTime + 70;
-  }
-  const ctx = drawingContext;
-  ctx.save(); ctx.globalCompositeOperation = 'source-over';
-  ctx.globalAlpha = BLUE_NOISE_OPACITY;
-  ctx.imageSmoothingEnabled = true;
-  ctx.drawImage(blueNoiseCloud, 0, 0, CANVAS_W, CANVAS_H);
-  ctx.restore();
-}
-
-// Consumption Code Rain — sizes are internal canvas pixels; speeds are px/second.
-const CODE_RAIN_ENABLED = true;
-const CODE_RAIN_FONT_MIN = 7;
-const CODE_RAIN_FONT_MAX = 10;
-const CODE_RAIN_LINE_SPACING = 10;
-const CODE_RAIN_DENSITY = 0.87;
-const CODE_RAIN_CLUSTER_MIN = 16;
-const CODE_RAIN_CLUSTER_MAX = 23;
-const CODE_RAIN_WIDTH_MIN = 18;
-const CODE_RAIN_WIDTH_MAX = 48;
-const CODE_RAIN_LENGTH_MIN = 130;
-const CODE_RAIN_LENGTH_MAX = 760;
-const CODE_RAIN_SPEED_MIN = 45;
-const CODE_RAIN_SPEED_MAX = 130;
-const CODE_RAIN_OPACITY = 0.9;
-const CODE_RAIN_MUTATION_INTERVAL = 1600;
-const CODE_RAIN_PHRASE_INTERVAL = 5500;
-const CODE_RAIN_COLORS = ['#F4F2FF', '#F4F2FF', '#E7E1FF', '#D4CAFF', '#BCC5FF'];
-const CODE_RAIN_PHRASES = [
-  'BUY BUY BUY', 'WANT MORE', 'NEED MORE', 'ADD TO CART', 'CONSUME',
-  'DESIRE', 'PURCHASE COMPLETE', 'JUST ONE MORE', 'NEW DESIRE DETECTED',
-  'SATISFACTION EXPIRED', 'BUY AGAIN', 'REPEAT PURCHASE', 'MORE MORE MORE',
-  'WHAT AM I WITHOUT...', 'DO YOU HAVE A TASTE?', 'WHO AM I WITHOUT IT?',
-  'DO I OWN IT?', 'OR DOES IT OWN ME?', 'YOU ARE WHAT YOU CONSUME',
-  'THE THINGS YOU OWN END UP OWNING YOU', 'IS THIS REALLY ME?',
-  'IDENTITY LOADING', 'SELF WORTH = ?', 'WHO DEFINES ME?', 'WHAT DEFINES YOU?',
-  'OWNED', 'WANT != NEED', 'SDG_12: RESPONSIBLE_CONSUMPTION', 'REPAIR > REPLACE'
-];
-const CODE_RAIN_VARIABLES = ['desire', 'identity', 'selfWorth', 'ownership', 'purchaseCount', 'need', 'want', 'waste', 'resources'];
-let codeRainStreams = [];
-const rainRandom = (a, b) => a + Math.random() * (b - a);
-const rainPick = list => list[Math.floor(Math.random() * list.length)];
-function makeConsumptionLine() {
-  const variable = rainPick(CODE_RAIN_VARIABLES);
-  const number = Math.floor(rainRandom(0, 10000)).toString().padStart(4, '0');
-  return rainPick([
-    () => rainPick(CODE_RAIN_PHRASES),
-    () => `${variable} += ${number}; // OWNED`,
-    () => `if(want>need){buy(${number});}`,
-    () => `while(desire){consume();}`,
-    () => `cart.push(${variable});`,
-    () => `SYS_${rainPick(['OWNED','ID_LOST','ERR_SELF','PURCHASE_OK','LOOP_ACTIVE'])}_${number}`,
-    () => `${variable}=[want,need,identity];`,
-    () => `status="${rainPick(CODE_RAIN_PHRASES)}";`,
-    () => `satisfaction *= 0.5; / ${number}`,
-    () => `${rainPick(['BUY ','MORE_','OWNED/','DESIRE>']).repeat(Math.floor(rainRandom(2, 7)))}`,
-    () => `DESIRE.EXE >> ${variable}:${number}`,
-    () => `// ${rainPick(CODE_RAIN_PHRASES)} ...`
-  ])();
-}
-function paintRainRow(stream, rowIndex) {
-  const ctx = stream.ctx, row = stream.rows[rowIndex];
-  const top = rowIndex * stream.lineHeight;
-  ctx.clearRect(0, top, stream.canvas.width, stream.lineHeight);
-  ctx.save(); ctx.beginPath(); ctx.rect(0, top, stream.canvas.width, stream.lineHeight); ctx.clip();
-  ctx.font = `${stream.font}px monospace`;
-  ctx.textBaseline = 'top'; ctx.fillStyle = row.color; ctx.globalAlpha = row.alpha;
-  if (row.visible) ctx.fillText(row.text, row.indent, top);
-  ctx.restore();
-}
-function initCodeRain() {
-  codeRainStreams = [];
-  const clusters = Math.floor(rainRandom(CODE_RAIN_CLUSTER_MIN, CODE_RAIN_CLUSTER_MAX + 1));
-  for (let cluster = 0; cluster < clusters; cluster++) {
-    const centre = rainRandom(0, CANVAS_W);
-    const start = rainRandom(0, 1800);
-    const count = Math.floor(rainRandom(6, 13));
-    let x = centre - count * 7;
-    for (let n = 0; n < count; n++) {
-      const depth = Math.floor(rainRandom(0, 3));
-      const font = rainRandom(CODE_RAIN_FONT_MIN, CODE_RAIN_FONT_MAX);
-      const width = Math.round(rainRandom(CODE_RAIN_WIDTH_MIN, CODE_RAIN_WIDTH_MAX));
-      const lineHeight = CODE_RAIN_LINE_SPACING;
-      const length = rainRandom(CODE_RAIN_LENGTH_MIN, CODE_RAIN_LENGTH_MAX);
-      const rowCount = Math.ceil((length + rainRandom(180, 650)) / lineHeight);
-      const canvas = document.createElement('canvas');
-      canvas.width = width; canvas.height = rowCount * lineHeight;
-      const stream = { canvas, ctx: canvas.getContext('2d'), x: Math.round(x), font, lineHeight,
-        y: (start + rainRandom(-200, 200) + canvas.height * 2) % canvas.height,
-        speed: rainRandom(CODE_RAIN_SPEED_MIN + depth * 15, CODE_RAIN_SPEED_MAX - (2 - depth) * 20),
-        alpha: [0.32, 0.62, 1][depth], depth, rows: [],
-        nextMutation: rainRandom(800, 3200), nextPhrase: rainRandom(3500, 8000) };
-      const chars = Math.max(3, Math.floor(width / (font * 0.61)));
-      let fragment = '';
-      for (let row = 0; row < rowCount; row++) {
-        if (!fragment.length) fragment = makeConsumptionLine();
-        const text = fragment.slice(0, chars); fragment = fragment.slice(chars);
-        // The empty tail and short internal gaps move WITH the strand.
-        const visible = row * lineHeight < length && Math.random() < CODE_RAIN_DENSITY;
-        stream.rows.push({text, indent: 0, color: rainPick(CODE_RAIN_COLORS),
-          alpha: rainRandom(0.75, 1), visible});
-        paintRainRow(stream, row);
-      }
-      codeRainStreams.push(stream);
-      x += rainRandom(7, 17);
-    }
-  }
-  codeRainStreams.sort((a,b) => a.depth - b.depth);
-}
-function drawCodeRain(dt) {
-  if (!CODE_RAIN_ENABLED) return;
-  if (!codeRainStreams.length) initCodeRain();
-  const ctx = drawingContext;
-  ctx.save(); ctx.globalCompositeOperation = 'source-over';
-  ctx.imageSmoothingEnabled = false;
-  for (const stream of codeRainStreams) {
-    // Persistent position, positive velocity: physical travel, never a paused window.
-    stream.y += stream.speed * Math.max(0, dt);
-    stream.y %= stream.canvas.height;
-    if (artTime >= stream.nextMutation) {
-      const index = Math.floor(rainRandom(0, stream.rows.length));
-      stream.rows[index].text = stream.rows[index].text.replace(/\d/, () => String(Math.floor(Math.random()*10)));
-      paintRainRow(stream, index);
-      stream.nextMutation = artTime + CODE_RAIN_MUTATION_INTERVAL * rainRandom(0.8, 1.5);
-    }
-    if (artTime >= stream.nextPhrase) {
-      // Replace only an offscreen row, so visible fragments remain trackable.
-      const index = Math.floor(rainRandom(0, stream.rows.length));
-      const y = (stream.y + index * stream.lineHeight) % stream.canvas.height;
-      if (y > CANVAS_H && y < stream.canvas.height - stream.lineHeight) {
-        stream.rows[index].text = makeConsumptionLine().slice(0, Math.max(3, Math.floor(stream.canvas.width / (stream.font * 0.61))));
-        paintRainRow(stream, index);
-      }
-      stream.nextPhrase = artTime + CODE_RAIN_PHRASE_INTERVAL * rainRandom(0.8, 1.5);
-    }
-    ctx.globalAlpha = CODE_RAIN_OPACITY * stream.alpha;
-    for (let y = stream.y - stream.canvas.height; y < CANVAS_H; y += stream.canvas.height) {
-      ctx.drawImage(stream.canvas, stream.x, y);
-    }
-  }
-  ctx.restore();
-}
-
 // OWNED — generative artwork. Page layout is in style.css and script.js.
 // Adjust the settings below, then reload. Images load from the images/ folder.
 // Topmost kinetic typography — adjust here.
@@ -265,6 +95,7 @@ const TONGUE_REGION = [[0.35,0.48],[0.65,0.48],[0.62,0.78],[0.55,0.86],[0.45,0.8
 let objectAssetPool = [];
 let stage, objects = [], pointers = [], tongueAsset = null;
 let artTime = 0;
+let generativeBackground;
 const pick = values => values[Math.floor(random(values.length))];
 
 function setup() {
@@ -273,6 +104,9 @@ function setup() {
   stage.elt.id = 'owned-collage';
   stage.parent('artwork');
   stage.elt.setAttribute('aria-label', 'OWNED: animated consumption collage');
+  generativeBackground = new TasteBackground();
+  stage.elt.dataset.background = generativeBackground.mode;
+  stage.elt.dataset.seed = String(generativeBackground.seed);
   frameRate(60);
   noSmooth();
   if (SEED !== null) { randomSeed(SEED); noiseSeed(SEED); }
@@ -284,9 +118,7 @@ function setup() {
 
 function draw() {
   artTime = millis();
-  background('#0019FF');
-  drawBlueNoise();
-  drawCodeRain(Math.max(0, deltaTime) / 1000);
+  generativeBackground.draw(drawingContext, CANVAS_W, CANVAS_H, artTime);
   updateObjects();
   drawObjects();
   drawTongue();
