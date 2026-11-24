@@ -32,3 +32,27 @@ for(let i=0;i<1000;i++){
 }
 assert.equal(seen.size,7);
 console.log('PASS reload selection: no consecutive repeats, all seven reachable');
+// A held frame must be identical until the next cut, with an opaque reset on each cut.
+for (const mode of Background.MODES) {
+ const clears=[];
+ global.document = {createElement: () => ({getContext: () => new Proxy({}, {
+  get: (target,key) => key in target ? target[key] : (...args) => {
+   if(key==='fillRect' && args.join(',')==='0,0,960,540') clears.push(target.globalAlpha);
+  }
+ })})};
+ const engine=new Background({mode,seed:8101});
+ engine.draw(ctx,1920,1080,0);const beat=engine.beat,deadline=engine.nextJump;
+ engine.draw(ctx,1920,1080,deadline-0.01);
+ assert.equal(engine.beat,beat,`${mode}: must hold without smooth motion`);
+ assert.equal(clears.length,1,`${mode}: cached frame must not be repainted`);
+ engine.draw(ctx,1920,1080,deadline);
+ assert.equal(engine.beat,beat+1,`${mode}: must jump at deadline`);
+ assert.deepEqual(clears,[1,1],`${mode}: no translucent trail accumulation`);
+ engine.draw(ctx,1920,1080,600000);
+ assert.equal(engine.beat,beat+2,`${mode}: no catch-up burst after returning to the tab`);
+}
+assert(!Background.MODES.includes('vortex'));
+assert(!Background.MODES.includes('swarm'));
+assert.equal(new Background({mode:'vortex',seed:1}).mode,'shards');
+assert.equal(new Background({mode:'swarm',seed:1}).mode,'scatter');
+console.log('PASS hard cuts: exact frame holds, opaque resets, no tornado/flow modes, old links supported');

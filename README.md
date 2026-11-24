@@ -29,18 +29,20 @@ The canvas uses 1920×1080 internal dimensions and scales to fit the browser. Gi
 
 Every reload chooses a fresh seed and one of seven systems. In the same browser tab, consecutive reloads avoid the previous system when session storage is available. Layout, density and motion vary within each system; each continues to evolve over time.
 
-- **Redaction:** flowing reveal masks uncover and censor a field of consumption words.
-- **Mosaic:** moving wave masks assemble coloured character tiles.
-- **Vortex:** words rotate through two projected twisting volumes around the mouth.
-- **Receipts:** independently scrolling receipt columns split into torn fragments.
-- **Swarm:** word particles follow a changing flow field, leaving short trails.
+- **Redaction:** abrupt block masks reveal and censor consumption words, alternating dense and sparse states.
+- **Mosaic:** character tiles jump between broken grids, with row offsets, missing blocks and sudden letter substitutions.
+- **Shards:** flat paragraph fragments snap into new broken arrangements; replaces the former vortex.
+- **Receipts:** receipt columns advance in hard steps and tear sideways.
+- **Scatter:** crisp words jump to new positions with no fading or trails; replaces the former swarm.
 - **Automata:** neighbouring cells generate new text patterns using rules 30, 90, 110 or 150, with occasional fresh inputs.
-- **Rain:** staggered streams carry fragments of consumption phrases.
+- **Rain:** staggered streams jump in discrete steps with sideways corruption.
 
-The backgrounds render on a small cached canvas at up to 30 fps, separately from the foreground animation. Their random state does not alter the tuned clothing, typography or pointer timing. No new libraries, images or network requests are needed.
+The backgrounds hold an exact cached frame for roughly 37–169 ms, with occasional longer holds, then cut directly to the next state. Five horizontal strips are displaced on each cut. Each frame starts with an opaque blue reset: no interpolation, motion blur or accumulated trails. The foreground animation keeps its own timing. Their random state does not alter the tuned clothing, typography or pointer timing. No new libraries, images or network requests are needed.
 
 For a repeatable background preview, add `?background=mosaic&seed=8101` to the website URL (use any name above in lowercase). Remove the query to return to random selection. This reproduces the background, not the independently generated foreground.
 
 ## Checks
 
-Run `node tests/backgrounds.test.cjs` for seed variation, repeatability, continuing evolution, finite drawing coordinates and reload selection. Open `tests/backgrounds.html` through the local server to inspect all seven systems together. Its timing readout measures all seven running simultaneously, not the normal single-background page.
+Run `node tests/backgrounds.test.cjs` for seed variation, repeatability, continuing evolution, finite drawing coordinates, reload selection, exact frame holds and opaque clears. Open `tests/backgrounds.html` through the local server to inspect all seven systems together. Its timing readout measures all seven running simultaneously, not the normal single-background page.
+
+Legacy `background=vortex` and `background=swarm` preview links resolve to `shards` and `scatter`.
