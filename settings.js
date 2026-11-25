@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// Student direction: 1920 x 1080 artwork, fast object jumps and yellow tracking boxes.
+// Course foundation: variables and arrays; AI helped organise the shared settings.
 const CANVAS_W = 1920,
   CANVAS_H = 1080;
 const SEED = null; // null = new artwork each reload
@@ -14,7 +15,6 @@ const OBJECT_SIZE_MIN = 170; // Longest edge, in canvas pixels.
 const OBJECT_SIZE_MAX = 320;
 const timed = (ms) => (ms * 3) / Math.max(0.1, GLITCH_SPEED_MULTIPLIER);
 const MAX_OBJECTS = 8;
-const PALETTE = ['#FFFF00', '#FF00B8', '#173BFF', '#FF1616', '#00FF20', '#000000', '#FFFFFF'];
 const TONGUE_PATH = 'images/Tongue.PNG';
 const OBJECT_PATHS = [
   'images/IMG_0460.PNG',
@@ -53,6 +53,7 @@ const OBJECT_PATHS = [
   'images/IMG_0509.PNG',
   'images/IMG_0510.PNG',
 ];
+// AI-assisted: normalised coordinates keep random tracking points inside the tongue area.
 const TONGUE_REGION = [
   [0.35, 0.48],
   [0.65, 0.48],

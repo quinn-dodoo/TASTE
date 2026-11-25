@@ -20,7 +20,7 @@ A generative artwork by Nguyễn Hoàng Quỳnh Anh for COMM2754 — Digital Med
 
 VS Code users can also open `index.html` with the Live Server extension if it is already installed.
 
-Any static web server works. No build, npm installation or internet connection is needed to run the artwork. Use a web server rather than opening the HTML through `file://`, so the image files can load correctly. The original PNG files are large and load progressively.
+Any static web server works. No build, npm installation or internet connection is needed to run the artwork. Use a web server rather than opening the HTML through `file://`, so the image files can load correctly. The original PNG files are large and load progressively. Objects appear only after their images load; unavailable images are skipped without placeholder shapes.
 
 ## Viewing and controls
 
@@ -45,13 +45,13 @@ The canvas is **1920 × 1080 pixels**, including on Retina displays. It scales p
 | `backgrounds.js`                                 | Seven seeded word-glitch systems                                   |
 | `script.js`, `style.css`                         | Responsive page, fullscreen and information window                 |
 | `p5.min.js`                                      | Unmodified p5.js 2.4.0 library                                     |
-| `images/`                                        | Original artwork images; names are case-sensitive                  |
-| `Sound/`                                         | Sound experiments and Audacity sessions; not played by the website |
+| `images/`                                        | Background-removed runtime images; names are case-sensitive. |
+| `Sound/` | Sound experiments and Audacity sessions; not played by the website |
 | `tests/`                                         | Optional checks and background preview gallery                     |
 | `LICENSE`                                        | Full GNU GPL version 3 license for original code                   |
 | `THIRD_PARTY_NOTICES.md`, `licenses/`, `vendor/` | Credits, third-party licenses and upstream source                  |
 
-Most functions have fewer than 15 nonblank body lines. A few image-loading and fallback-drawing routines stay together for readability. Comments explain timing, image processing or third-party attribution where needed. The bundled p5 library is kept intact.
+Most functions have fewer than 15 nonblank body lines. A few image-loading routines stay together for readability. Comments explain timing, image processing or third-party attribution where needed. The bundled p5 library is kept intact.
 
 ## Generative systems
 
@@ -70,6 +70,18 @@ Frames are held briefly, then replaced with a solid blue reset and displaced str
 For a repeatable background, append `?background=mosaic&seed=8101` to the URL. Use any lowercase name above. Remove the query to restore random selection. This reproduces only the background; foreground images and typography remain independent. Older `vortex` and `swarm` links resolve to `shards` and `scatter`.
 
 To add an image, add its exact filename to `OBJECT_PATHS` in `settings.js`. Object timing lives there too; large-text colours and timing are at the top of `typography.js`.
+
+## Authorship notes
+
+Short comments identify contributions at the start of each main section:
+
+- **Student direction** credits the concept, visual choices and feedback that shaped TASTE.
+- **Course foundation** identifies techniques covered in Renick Bell's lessons, such as variables, arrays, loops, random selection, image drawing and the p5 animation loop. It describes the learning basis, not proof that a particular implementation was written without assistance.
+- **AI-assisted / AI support** names the implementation help: layout calculations, image processing, timing, canvas compositing, interface behaviour and testing. Basic code can also be AI-assisted.
+
+A support note at the start of a file or section covers its related helpers, so the same credit does not need to appear above every function. These notes distinguish design decisions from implementation support; they do not label code as independently student-written based on difficulty alone. The original p5 library and credited Mulberry32 algorithm remain third-party code, with their existing notices preserved.
+
+Course references: [12-week p5.js course](https://renickbell.net/doku.php?id=12-week-p5js), [working with photos](https://renickbell.net/doku.php?id=p5js-photos), and [animation](https://renickbell.net/doku.php?id=p5js-animation).
 
 ## Checks
 

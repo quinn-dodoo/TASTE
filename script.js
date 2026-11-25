@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// Student direction: the whole composition should fit the screen without stretching.
+// AI-assisted: calculate a proportional display size and position the information button.
 function fitCanvasToWindow() {
   const canvas = document.getElementById('owned-collage');
   if (!canvas) {
@@ -20,7 +21,7 @@ function positionInfoButton(canvas) {
 }
 window.addEventListener('resize', fitCanvasToWindow);
 
-// Non-modal information window: no sketch state or animation calls.
+// Student direction: retro project-information window with open/close controls, keyboard focus and input handling independent of p5.
 const infoButton = document.getElementById('info-button');
 const infoWindow = document.getElementById('info-window');
 const infoClose = document.getElementById('info-close');
@@ -40,7 +41,7 @@ function closeInfoWindow() {
 }
 infoButton.addEventListener('click', openInfoWindow);
 infoClose.addEventListener('click', closeInfoWindow);
-// Stop UI input before it reaches the document-level p5 handlers.
+
 for (const element of [infoButton, infoWindow]) {
   for (const type of [
     'pointerdown',
@@ -79,7 +80,7 @@ document.addEventListener(
   true,
 );
 
-// Title-bar dragging, with viewport bounds recalculated after resizing.
+// Student direction: title-bar dragging and bounds checks keep the window reachable after resizing.
 const infoTitlebar = infoWindow.querySelector('.window-titlebar');
 let infoDrag = null;
 function clampInfoPosition(left, top) {
@@ -120,6 +121,7 @@ for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
 window.addEventListener('resize', fitInfoWindow);
 new ResizeObserver(fitInfoWindow).observe(infoWindow);
 
+// AI-assisted: browser fullscreen controls and a fallback when access is unavailable.
 async function toggleFullscreen() {
   try {
     if (document.fullscreenElement) await document.exitFullscreen();

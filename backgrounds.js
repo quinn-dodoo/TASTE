@@ -1,6 +1,7 @@
-// SPDX-License-Identifier: GPL-3.0-only
 {
   const root = globalThis;
+  // Student direction: varied word backgrounds on reload, with abrupt jumps and no trails.
+  // AI support: the seven mode implementations, seeded variation and frame timing below.
   const MODES = ['redaction', 'mosaic', 'shards', 'receipts', 'scatter', 'automata', 'rain'];
   const WORDS = [
     'WANT',
@@ -45,6 +46,8 @@
       return ((n ^ (n >>> 14)) >>> 0) / 4294967296;
     };
   }
+  // Student direction (Course foundation): random selection from arrays.
+  // AI-assisted: avoid the previous mode and support repeatable seeds for checking results.
   function chooseMode(random, previous, requested) {
     if (MODES.includes(requested)) return requested;
     const choices = MODES.filter((mode) => mode !== previous);
@@ -65,7 +68,6 @@
     try {
       root.sessionStorage.setItem('taste-background', mode);
     } catch {
-      /* Storage may be disabled; random selection still works. */
     }
   }
   function backgroundSurface() {
@@ -108,11 +110,13 @@
     pick(list) {
       return list[Math.floor(this.random() * list.length)];
     }
+    // AI-assisted: derive repeatable values from the seed for each beat and text fragment.
     hash(n) {
       let h = Math.imul((n | 0) ^ this.seed, 1597334677);
       h = Math.imul(h ^ (h >>> 16), 2246822507);
       return ((h ^ (h >>> 13)) >>> 0) / 4294967296;
     }
+    // Initialise only the selected mode; loops build its words, tiles or streams.
     initialize() {
       const initializers = {
         redaction: 'initRedaction',
@@ -163,6 +167,7 @@
       for (let i = 0; i < 480; i++)
         this.items.push({ x: this.range(0, W), y: this.range(0, H), word: this.pick(WORDS) });
     }
+    // Set up cellular automata with rules 30, 90, 110 or 150.
     initAutomata() {
       this.columns = 96;
       this.rows = 54;
@@ -183,17 +188,20 @@
           alpha: this.range(0.25, 0.7),
         });
     }
+    // AI-assisted: calculate each cell from its neighbours and retain recent rows.
     stepCells() {
       const cells = this.cells,
         n = cells.length;
       this.cells = cells.map(
         (cell, i) => (this.rule >> (cells[(i + n - 1) % n] * 4 + cell * 2 + cells[(i + 1) % n])) & 1,
       );
-      // A new desire enters the system; patterns keep evolving instead of settling empty.
+      // Occasionally flip a cell to keep the pattern active.
       if (this.random() < 0.28) this.cells[Math.floor(this.random() * n)] ^= 1;
       this.history.unshift(this.cells);
       this.history.length = Math.min(this.rows, this.history.length);
     }
+    // Student direction: hard, stuttering changes rather than smooth or ghost-like movement.
+    // AI-assisted: hold each frame, clear to solid blue and displace strips from that frame.
     draw(target, width, height, now) {
       if (this.lastPaint === null || now >= this.nextJump) this.paintFrame(now);
       target.save();
@@ -235,6 +243,7 @@
         c.drawImage(this.sliceCanvas, 0, y, W, height, shift, y, W, height);
       }
     }
+    // Redaction: reveal or cover word groups, then shift their rows on each beat.
     redaction() {
       const sparse = Math.floor(this.beat / 6) % 3 === 1;
       for (const [i, item] of this.items.entries()) {
@@ -258,6 +267,7 @@
       }
       c.fillText(item.word, x + 2, y + 1);
     }
+    // Mosaic: form character tiles and break the grid with gaps and row offsets.
     mosaic() {
       const dense = Math.floor(this.beat / 5) % 3 === 0;
       const size = this.tile + (dense ? 3 : 0);
@@ -286,6 +296,7 @@
       c.fillStyle = '#00127c';
       c.fillText(this.message[wrap(index + beat * 13, this.message.length)], x, y);
     }
+    // Shards: clip paragraph fragments and snap them to new positions.
     shards() {
       this.ctx.font = '9px monospace';
       for (const [i, fragment] of this.items.entries()) {
@@ -311,6 +322,7 @@
       const shift = this.hash(key + row * 17) > 0.7 ? 36 : 0;
       c.fillText(fragment.phrase + ' / ' + fragment.phrase, x - shift, y + row * 11);
     }
+    // Receipts: repeat columns with stepped vertical movement and sideways tears.
     receipts() {
       const c = this.ctx;
       for (const [i, strip] of this.items.entries()) {
@@ -340,6 +352,8 @@
         row % 9 === 0 ? `TOTAL: ${String(Math.floor(this.time) + index * 73).padStart(5, '0')}` : strip.phrase;
       c.fillText(text, strip.x + shift + 3, y + 2);
     }
+    // Student direction: scattered words should jerk, with no swirling movement or trails.
+    // Scatter: shift words on each held frame and clear their previous positions.
     scatter() {
       this.ctx.font = '8px monospace';
       for (const [i, point] of this.items.entries()) {
@@ -356,6 +370,7 @@
       c.fillStyle = index % 37 === 0 ? '#d5ff38' : '#dce3ff';
       c.fillText(beat % 4 === 0 ? WORDS[(index + beat) % WORDS.length] : point.word, x, y);
     }
+    // Automata: turn the evolving cell history into a field of letters and blocks.
     automata() {
       while (this.generation < this.beat * 3) {
         this.stepCells();
@@ -377,6 +392,7 @@
       if ((col + row) % 5 === 0) c.fillRect(x, y, 8, 8);
       else c.fillText('WANTMORE'[(row + col) % 8], x, y);
     }
+    // Rain: wrap phrase fragments into streams that move in discrete steps.
     rain() {
       this.ctx.font = '6px monospace';
       for (const stream of this.items) {

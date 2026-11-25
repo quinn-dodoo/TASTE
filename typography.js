@@ -1,11 +1,11 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// Student direction: oversized multilingual type, bright colours and sharp changes in rhythm => text fitting, display treatments, burst timing and canvas compositing.
 const SHOW_TASTE_TYPE = true;
-const TASTE_OPACITY = 1; // 0–1; lower reveals more of the photos
-const TASTE_BLEND = 'source-over'; // 'multiply', 'overlay', or 'source-over'
-const TASTE_SPEED = 1.4; // higher = faster font, word and slice changes
-const TASTE_REST_MIN = 80; // Uneven text-free pauses, milliseconds
+const TASTE_OPACITY = 1;
+const TASTE_BLEND = 'source-over';
+const TASTE_SPEED = 1.4;
+const TASTE_REST_MIN = 80;
 const TASTE_REST_MAX = 650;
-const TASTE_STEP_MIN = 80; // English words appear one at a time
+const TASTE_STEP_MIN = 80;
 const TASTE_STEP_MAX = 150;
 let lastTasteRest = 0;
 let tasteBurstActive = false,
@@ -18,11 +18,11 @@ const TASTE_ERROR_COPIES = 8;
 let tasteErrorBurst = false,
   tasteErrorCopies = [],
   tasteErrorBorder = '#FFFF00';
-const TASTE_FULL_HOLD_MIN = 120; // Hold the completed poster before clearing
+const TASTE_FULL_HOLD_MIN = 120;
 const TASTE_FULL_HOLD_MAX = 240;
 let tasteAccumulationStepMs = 180,
   tasteAccumulationInk = '#f40220';
-const TASTE_SIZE = 1; // overall typography scale
+const TASTE_SIZE = 1;
 const TASTE_WORDS = ['TASTE!', 'VỊ GIÁC', 'GOÛT', 'SABOR', 'GUSTO', 'GESCHMACK', '味覚', 'テイスト', '미각', '味觉'];
 const JAPANESE_FONT = '"Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif';
 const DISPLAY_STYLES = ['title', 'outline', 'led', 'neon', 'neon'];
@@ -55,8 +55,9 @@ const TASTE_POSTER_COLORS = [
   '#FFFF00',
   '#FF7B30',
 ];
-const TASTE_NEON_BLUE = '#0019ff'; // Only occasional neon faces, never ordinary text.
+const TASTE_NEON_BLUE = '#0019ff';
 
+// Student direction: change language, colour and type treatment between bursts => Random array choices build each card; its timer controls when those choices change.
 function mutateTasteCard(card) {
   card.word = pick(TASTE_WORDS);
   card.displayStyle = pick(DISPLAY_STYLES);
@@ -87,6 +88,8 @@ function paintTasteCard(ctx, card) {
   else paintPlainTaste(ctx, card, width, height);
 }
 
+// Student direction: the type stretches in abrupt steps.
+// AI-assisted: calculate width and height from a stepped beat, then fit the glyphs to that area.
 function tasteCardSize(card) {
   const beat = Math.floor((artTime - tasteSceneStarted) * 0.012 * TASTE_SPEED);
   const wave = Math.sin(beat * 0.95 + card.phase),
@@ -112,6 +115,7 @@ function paintPlainTaste(ctx, card, width, height) {
   ctx.restore();
 }
 
+// AI-assisted: sample a rendered glyph into a cached dot grid for the LED treatment.
 function getTasteDots(word) {
   if (tasteDotCache.has(word)) return tasteDotCache.get(word);
   const surface = createSurface(1, 240),
@@ -139,6 +143,7 @@ function sampleGlyphDots(ctx, width) {
   return dots;
 }
 
+// Student direction: bold colour contrasts and layered outlines on the large lettering => Size the text, then build its treatment with strokes, shadows or sampled dots.
 function paintDisplayTaste(ctx, card, word, targetW, targetH) {
   ctx.save();
   ctx.translate(card.x, card.y);
@@ -190,6 +195,8 @@ function paintTitleTaste(ctx, card, word, width) {
   ctx.fillRect(width / 2 - 50, 70, 85, 4);
 }
 
+// Student direction: bursts of type with pauses that reveal the mouth and objects.
+// AI-assisted: manage headline, accumulation and error-stack states with separate timers.
 function updateTasteRhythm() {
   if (tasteBurstActive && artTime >= tasteBurstUntil) finishTasteBurst();
   if (!tasteBurstActive && artTime < tasteRestUntil) return false;
@@ -232,6 +239,7 @@ function setTasteBurstTiming() {
   if (tasteErrorBurst) startErrorTaste();
 }
 
+// Stagger repeated copies and reveal them one at a time.
 function startErrorTaste() {
   tasteErrorBorder = pick(TASTE_COLORS.filter((ink) => ink !== tasteAccumulationInk));
   const direction = random() < 0.5 ? -1 : 1;
@@ -279,6 +287,7 @@ function paintErrorCopy(ctx, copy) {
   ctx.restore();
 }
 
+// Render the text scene to a separate canvas before compositing it over the collage.
 function drawTasteTypography() {
   if (!updateTasteRhythm()) return;
   if (!tasteCanvas) {
@@ -306,6 +315,7 @@ function repaintTaste() {
   tastePaintAt = artTime + random(55, 100) / Math.max(0.1, TASTE_SPEED);
 }
 
+// Student direction: cut, shift or omit canvas strips while keeping the rest of the text aligned.
 function createTasteSlices() {
   tasteSlices = [];
   const count = tasteAccumulationBurst || tasteErrorBurst ? 2 : 7;

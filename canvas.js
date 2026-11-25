@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// Student direction: stretched lettering with thick outlines.
+// AI support: reusable drawing helpers and text-fitting calculations.
 function createSurface(width, height) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -18,6 +19,7 @@ function strokeWord(ctx, word, color, width, x = 0, y = 0) {
   ctx.strokeText(word, x, y);
 }
 
+// Measure glyph width, ascent and descent so different scripts fit their boxes.
 function fitWord(ctx, word, width, height, fallbackDescent = 1) {
   const metrics = ctx.measureText(word);
   const ascent = metrics.actualBoundingBoxAscent || 135;

@@ -1,8 +1,9 @@
-// SPDX-License-Identifier: GPL-3.0-only
 let artTime = 0;
 let generativeBackground;
 const pick = (values) => values[Math.floor(random(values.length))];
 
+// Student direction: a full-screen 1920 x 1080 generative collage.
+// Course foundation: setup() and draw(); AI helped connect the systems and image loading.
 function setup() {
   createStage();
   pixelDensity(1);
@@ -27,6 +28,7 @@ function createStage() {
   stage.elt.dataset.seed = String(generativeBackground.seed);
 }
 
+// Student direction: background, objects, photographic tongue, pointers, then large type, combine these layers in the p5 draw loop, with separate update timings.
 function draw() {
   artTime = millis();
   generativeBackground.draw(drawingContext, CANVAS_W, CANVAS_H, artTime);

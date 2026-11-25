@@ -1,7 +1,8 @@
-// SPDX-License-Identifier: GPL-3.0-only
 let objectAssetPool = [];
 let tongueAsset = null;
 
+// Student direction: use photographic objects and the original tongue image.
+// AI support: image loading, cropping and connector-point calculations in this file.
 function fetchAsset(path, isTongue = false) {
   return new Promise((resolve) => {
     let finished = false;
@@ -31,6 +32,7 @@ function readAsset(image, isTongue, path) {
   }
 }
 
+// Decode a few images at a time and show each successful load without placeholders.
 async function loadAssets() {
   const tongueJob = fetchAsset(TONGUE_PATH, true).then((asset) => {
     tongueAsset = asset;
@@ -58,6 +60,7 @@ async function loadObjectQueue(queue, loaded) {
   }
 }
 
+// Reduce image size and crop transparent margins before placing each cutout.
 function prepareAsset(image, isTongue) {
   const factor = Math.min(1, (isTongue ? 1000 : 650) / Math.max(image.width, image.height));
   const canvas = createSurface(Math.round(image.width * factor), Math.round(image.height * factor));
@@ -94,6 +97,7 @@ function cropObject(canvas, pixels, bounds) {
   return { canvas: crop, ...findObjectEndpoint(pixels, bounds, crop) };
 }
 
+// Find a solid pixel near the centre for the pointer to land on.
 function findObjectEndpoint(pixels, bounds, crop) {
   const endpoint = { endX: 0.5, endY: 0.5, distance: Infinity };
   for (let y = bounds.minY; y <= bounds.maxY; y += 2) {
@@ -104,7 +108,6 @@ function findObjectEndpoint(pixels, bounds, crop) {
   return { endX: endpoint.endX, endY: endpoint.endY };
 }
 
-// Pick a solid pixel near the centre so connectors land on the cutout.
 function updateEndpoint(endpoint, { data, width }, bounds, crop, x, y) {
   const offset = (y * width + x) * 4;
   const nx = (x - bounds.minX) / crop.width,

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// AI-assisted test code: check artwork loading, layout, typography and pointer behaviour.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -64,7 +65,6 @@ const sandbox = {
   document: { createElement: makeCanvas },
   random,
   TWO_PI: Math.PI * 2,
-  CENTER: 'center',
   drawingContext: makeContext(),
   createCanvas: (width, height) => {
     setupCalls.push(['canvas', width, height]);
@@ -80,16 +80,6 @@ for (const name of [
   'randomSeed',
   'noiseSeed',
   'fitCanvasToWindow',
-  'push',
-  'pop',
-  'translate',
-  'rectMode',
-  'stroke',
-  'strokeWeight',
-  'fill',
-  'rect',
-  'noFill',
-  'line',
 ])
   sandbox[name] = () => {};
 const context = vm.createContext(sandbox);
@@ -101,6 +91,9 @@ for (const file of scripts.filter((file) => !['p5.min.js', 'script.js'].includes
 
 async function testArtwork() {
   context.setup();
+  assert.equal(vm.runInContext('objects.length', context), 0);
+  assert.equal(vm.runInContext('pointers.length', context), 0);
+  context.draw();
   for (let tick = 0; tick < 100; tick++) await Promise.resolve();
   assert.deepEqual(setupCalls.slice(0, 2), [
     ['canvas', 1920, 1080],
@@ -131,8 +124,13 @@ async function testArtwork() {
   assert(drawingCalls > 0);
   assert.equal(vm.runInContext('objectAssetPool.length', context), 35);
   assert.equal(context.findOpaqueBounds({ data: new Uint8ClampedArray(16), width: 2, height: 2 }), null);
+  context.loadImage = (_path, _success, failure) => failure();
+  await context.loadAssets();
+  assert.equal(vm.runInContext('objects.length', context), 0);
+  assert.equal(vm.runInContext('pointers.length', context), 0);
+  context.draw();
   console.log(
-    'PASS artwork: 1920×1080 setup, 35 assets, all three type scenes, object bounds, pointer IDs, finite drawing coordinates',
+    'PASS artwork: 1920×1080 setup, 35 assets, all three type scenes, object bounds, pointer IDs, finite drawing coordinates, empty/loading/failed-image states',
   );
 }
 testArtwork().catch((error) => {

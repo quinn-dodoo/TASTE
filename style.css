@@ -1,4 +1,5 @@
-/* SPDX-License-Identifier: GPL-3.0-only */
+/* Student direction: full-screen artwork with a separate retro information window.
+   AI support: CSS layout, component styling and responsive sizing below. */
 * {
   box-sizing: border-box;
 }
@@ -21,7 +22,8 @@ body {
   flex-shrink: 0;
 }
 
-/* Project information — Windows 95-inspired, independent of canvas sizing. */
+/* Student direction: a Windows-inspired information panel.
+   AI-assisted: raised borders, title bar and button states in CSS. */
 :root {
   --info-bar: #000080;
   --info-grey: #c0c0c0;
@@ -103,6 +105,7 @@ body {
   line-height: 18px;
   padding: 0;
 }
+/* Readable sections and scrolling within the information window. */
 .window-content {
   min-height: 0;
   overflow-y: auto;
@@ -179,6 +182,7 @@ body {
   font-size: 11px;
   flex-shrink: 0;
 }
+/* Adapt the information panel for narrow screens. */
 @media (max-width: 520px) {
   .window-content {
     padding: 15px;

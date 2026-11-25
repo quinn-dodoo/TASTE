@@ -1,3 +1,4 @@
+// AI-assisted test code: check background selection, seeded variation and frame behaviour.
 const assert = require('node:assert/strict');
 const { createHash } = require('node:crypto');
 const Background = require('../backgrounds.js');

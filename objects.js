@@ -1,11 +1,12 @@
-// SPDX-License-Identifier: GPL-3.0-only
 let objects = [];
 
+// Student direction: a changing selection of photographic consumer objects around the mouth.
+// AI support: object state and timing; selection uses arrays, loops and randomness from class.
 function arrangeObjects(assets) {
   const shuffled = shuffleAssets(assets);
-  const count = assets.length ? Math.min(MAX_OBJECTS, assets.length) : 6;
+  const count = Math.min(MAX_OBJECTS, assets.length);
   objects = [];
-  for (let i = 0; i < count; i++) objects.push(createObject(shuffled[i], i));
+  for (let i = 0; i < count; i++) objects.push(createObject(shuffled[i]));
   pointers = objects.map((_, index) => createPointer(index));
 }
 
@@ -18,9 +19,9 @@ function shuffleAssets(assets) {
   return shuffled;
 }
 
-function createObject(asset, index) {
+function createObject(asset) {
   const object = {
-    asset: asset || null,
+    asset,
     x: NaN,
     y: NaN,
     w: 1,
@@ -28,12 +29,13 @@ function createObject(asset, index) {
     nextMove: artTime + random(OBJECT_REPOSITION_MIN, OBJECT_REPOSITION_MAX),
     visible: true,
     showAt: 0,
-    symbol: index % 3,
   };
   randomizeObjectLayout(object);
   return object;
 }
 
+// Student direction: objects jump around the sides, leaving the mouth at the centre.
+// AI-assisted: compare positions to reduce overlaps and keep each photo in proportion.
 function randomizeObjectLayout(object) {
   resizeObject(object);
   let best = null,
@@ -52,7 +54,7 @@ function randomizeObjectLayout(object) {
 }
 
 function resizeObject(object) {
-  const ratio = object.asset ? object.asset.canvas.width / object.asset.canvas.height : 1.2;
+  const ratio = object.asset.canvas.width / object.asset.canvas.height;
   const edge = OBJECT_SIZE_MIN + Math.sqrt(random()) * (OBJECT_SIZE_MAX - OBJECT_SIZE_MIN);
   object.w = ratio >= 1 ? edge : edge * ratio;
   object.h = ratio >= 1 ? edge / ratio : edge;
@@ -79,6 +81,8 @@ function scoreObjectPosition(object, { x, y }) {
   return score;
 }
 
+// Student direction: objects disappear briefly, then jump faster than the large text.
+// AI-assisted: schedule hide/show states and hide the matching pointers during a jump.
 function updateObjects() {
   objects.forEach((object, index) => {
     if (!object.visible && artTime >= object.showAt) object.visible = true;
@@ -100,7 +104,9 @@ function pickObjectAsset(object) {
   return pick(unused.length ? unused : objectAssetPool);
 }
 
-const OBJECT_HALFTONE_DOT_SIZE = 4; // Larger number = coarser printed dots.
+// Student direction: yellow cutouts with dark printed dots.
+// AI-assisted: cache the conversion, map brightness to dot size and preserve transparency.
+const OBJECT_HALFTONE_DOT_SIZE = 4;
 const OBJECT_HALFTONE_YELLOW = '#FFFF00';
 const objectHalftoneCache = new WeakMap();
 
@@ -146,42 +152,13 @@ function paintHalftoneDots(ctx, print, sample) {
   }
 }
 
+// Student direction: show photographic cutouts only, with no temporary shape placeholders.
+// Draw visible objects after their image has loaded.
 function drawObjects() {
   for (const obj of objects) {
-    if (!obj.visible) {
-      continue;
-    }
+    if (!obj.visible) continue;
     const ox = Math.round(obj.x - obj.w / 2),
       oy = Math.round(obj.y - obj.h / 2);
-    if (obj.asset) {
-      drawingContext.drawImage(getObjectHalftone(obj.asset), ox, oy, obj.w, obj.h);
-    } else {
-      drawObjectFallback(obj);
-    }
+    drawingContext.drawImage(getObjectHalftone(obj.asset), ox, oy, obj.w, obj.h);
   }
-}
-
-function drawObjectFallback(obj) {
-  push();
-  translate(obj.x, obj.y);
-  rectMode(CENTER);
-  stroke('#000');
-  strokeWeight(5);
-  fill(PALETTE[(obj.symbol + 1) % 5]);
-  if (obj.symbol === 0) {
-    rect(0, 20, 125, 105);
-    noFill();
-    rect(0, -40, 65, 55);
-  } else if (obj.symbol === 1) {
-    rect(0, 0, 160, 100);
-    fill('#fff');
-    rect(15, 0, 66, 66);
-    fill('#000');
-    rect(15, 0, 36, 36);
-  } else {
-    rect(-45, 0, 65, 45);
-    rect(45, 0, 65, 45);
-    line(-12, 0, 12, 0);
-  }
-  pop();
 }

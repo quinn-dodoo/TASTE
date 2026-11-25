@@ -1,6 +1,6 @@
-// SPDX-License-Identifier: GPL-3.0-only
 let pointers = [];
 
+// Student direction
 function tongueTransform() {
   const tongueH = 1080;
   const tongueW = tongueAsset ? (tongueH * tongueAsset.canvas.width) / tongueAsset.canvas.height : tongueH;
@@ -15,6 +15,8 @@ function drawTongue() {
   drawingContext.drawImage(tongueAsset.canvas, pose.x - pose.w / 2, pose.y - pose.h / 2, pose.w, pose.h);
 }
 
+// Student direction: tracking squares sit on the tongue and point out to objects.
+// AI-assisted: sample an inset region to keep the anchors within the tongue.
 function randomAnchor() {
   const edge = Math.floor(random(TONGUE_REGION.length));
   const a = TONGUE_REGION[edge],
@@ -28,6 +30,8 @@ function randomAnchor() {
   };
 }
 
+// Student direction: changing targets and random labels from 1 to 35.
+// AI-assisted: reassign pointers to visible objects and coordinate their hide/show timings.
 function updatePointers() {
   for (const pointer of pointers) {
     if (pointer.visible && artTime >= pointer.changeAt) {
@@ -71,6 +75,7 @@ function hideObjectPointers(index, showAt) {
   }
 }
 
+// Student direction: thick yellow lines and crossed tracking squares, map tongue and object coordinates, then start each line at the box edge.
 function drawPointers() {
   if (!tongueAsset) return;
   const ctx = drawingContext,
